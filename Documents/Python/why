@@ -1,0 +1,76 @@
+#automation.py
+import requests as rq
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
+import time
+from selenium.webdriver.chrome.options import Options
+import random
+
+chrome_options = Options()
+chrome_options.add_experimental_option("detach", True)
+chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+
+chrome_driver_path = ChromeDriverManager().install()
+
+service = Service(chrome_driver_path)
+driver = webdriver.Chrome(service=service)
+
+url = "https://www.linkedin.com/login?"
+# driver.maximize_window()
+driver.get(url)
+
+
+payload = {
+    'session_key': 'horace.lawalt.18@cnu.edu',
+    'session_password': 'cNu24#jr'
+}
+
+
+def badlogin():
+    print("Bad Login!")
+
+def send_slow(where, payl, delay = random.uniform(0.03,0.2)): 
+        for i in payl:
+            where.send_keys(i)
+            time.sleep(delay)
+
+def login(driver):  # sourcery skip: remove-redundant-if
+    username = driver.find_element(By.ID, "username")
+    usern = payload["session_key"] 
+    send_slow(username, usern)
+    password = driver.find_element(By.CSS_SELECTOR, "input[id*='password']")
+    passw = payload["session_password"]
+    send_slow(password,passw)
+
+    #submitting login
+    click = driver.find_element(By.CSS_SELECTOR, "button[class*='btn__primary--large from__button--floating']")
+    click.click()
+    # time.sleep(10)
+    current_url = driver.current_url
+
+    if "session_redirect" in current_url:
+        badlogin()
+        exit()
+    elif "feed" in current_url:
+        print("Successful Login!")
+        # Options.headless=True
+        
+        
+        time.sleep(10)
+        input("Press any key to end")
+    else:
+        print(current_url)
+        print("extraneous login")
+
+
+login(driver)
+
+driver.get("https://www.linkedin.com/messaging/")
+driver.implicitly_wait(10)
+a = driver.find_element(By.CSS_SELECTOR, "input[id*='search-conversations']")
+send_slow(a,"pussy")
+time.sleep(10)
+print(a)
